@@ -1,0 +1,228 @@
+country_code,country_name,region
+AF,Afghanistan,ASIA
+AL,Albania,EUROPE
+DZ,Algeria,AFRICA
+AS,American Samoa,OCEANIA
+AD,Andorra,EUROPE
+AO,Angola,AFRICA
+AI,Anguilla,CARIBBEAN
+AG,Antigua and Barbuda,CARIBBEAN
+AR,Argentina,AMERICAS
+AM,Armenia,MIDDLE EAST
+AW,Aruba,CARIBBEAN
+AU,Australia,OCEANIA
+AT,Austria,EUROPE
+AZ,Azerbaijan,EUROPE
+BH,Bahrain,MIDDLE EAST
+BD,Bangladesh,ASIA
+BB,Barbados,CARIBBEAN
+BY,Belarus,EUROPE
+BE,Belgium,EUROPE
+BZ,Belize,AMERICAS
+BJ,Benin,AFRICA
+BM,Bermuda,AMERICAS
+BT,Bhutan,ASIA
+BO,Bolivia,AMERICAS
+BQ,Bonaire; St. Eustatius and Saba,CARIBBEAN
+BA,Bosnia and Herzegovina,EUROPE
+BW,Botswana,AFRICA
+BR,Brazil,AMERICAS
+VG,British Virgin Islands,CARIBBEAN
+BN,Brunei,ASIA
+BG,Bulgaria,EUROPE
+BF,Burkina Faso,AFRICA
+BI,Burundi,AFRICA
+KH,Cambodia,ASIA
+CM,Cameroon,AFRICA
+CA,Canada,AMERICAS
+CV,Cape Verde Islands,AFRICA
+KY,Cayman Islands,CARIBBEAN
+CF,Central African Republic,AFRICA
+TD,Chad,AFRICA
+CL,Chile,AMERICAS
+CN,China,ASIA
+CO,Colombia,AMERICAS
+KM,Comoro Islands,AFRICA
+CD,Congo (Dem. Rep.),AFRICA
+CG,Congo (Rep.),AFRICA
+CK,Cook Islands,OCEANIA
+CR,Costa Rica,AMERICAS
+HR,Croatia,EUROPE
+CU,Cuba,CARIBBEAN
+CW,Curacao,CARIBBEAN
+CY,Cyprus,EUROPE
+CZ,Czechia,EUROPE
+CI,Côte d'Ivoire,AFRICA
+DK,Denmark,EUROPE
+DJ,Djibouti,AFRICA
+DM,Dominica,CARIBBEAN
+DO,Dominican Republic,CARIBBEAN
+EC,Ecuador,AMERICAS
+EG,Egypt,AFRICA
+SV,El Salvador,AMERICAS
+GQ,Equatorial Guinea,AFRICA
+ER,Eritrea,AFRICA
+EE,Estonia,EUROPE
+ET,Ethiopia,AFRICA
+FK,Falkland Islands,AMERICAS
+FO,Faroe Islands,EUROPE
+FJ,Fiji,OCEANIA
+FI,Finland,EUROPE
+FR,France,EUROPE
+GF,French Guiana,AMERICAS
+PF,French Polynesia,OCEANIA
+FW,French West Indies,CARIBBEAN
+GA,Gabon,AFRICA
+GE,Georgia,EUROPE
+DE,Germany,EUROPE
+GH,Ghana,AFRICA
+GI,Gibraltar,EUROPE
+GR,Greece,EUROPE
+GL,Greenland,EUROPE
+GD,Grenada,CARIBBEAN
+GU,Guam,OCEANIA
+GT,Guatemala,AMERICAS
+GN,Guinea,AFRICA
+GW,Guinea-Bissau,AFRICA
+GY,Guyana,AMERICAS
+HT,Haiti,CARIBBEAN
+HN,Honduras,AMERICAS
+HK,Hong Kong (SAR China),ASIA
+HU,Hungary,EUROPE
+IS,Iceland,EUROPE
+IN,India,ASIA
+ID,Indonesia,ASIA
+IR,Iran,MIDDLE EAST
+IQ,Iraq,MIDDLE EAST
+IE,Ireland,EUROPE
+IL,Israel,MIDDLE EAST
+IT,Italy,EUROPE
+JM,Jamaica,CARIBBEAN
+JP,Japan,ASIA
+JO,Jordan,MIDDLE EAST
+KZ,Kazakhstan,ASIA
+KE,Kenya,AFRICA
+KI,Kiribati,OCEANIA
+XK,Kosovo,EUROPE
+KW,Kuwait,MIDDLE EAST
+KG,Kyrgyzstan,ASIA
+LA,Laos,ASIA
+LV,Latvia,EUROPE
+LB,Lebanon,MIDDLE EAST
+LS,Lesotho,AFRICA
+LR,Liberia,AFRICA
+LY,Libya,AFRICA
+LI,Liechtenstein,EUROPE
+LT,Lithuania,EUROPE
+LU,Luxembourg,EUROPE
+MO,Macao (SAR China),ASIA
+MG,Madagascar,AFRICA
+MW,Malawi,AFRICA
+MY,Malaysia,ASIA
+MV,Maldives,ASIA
+ML,Mali,AFRICA
+MT,Malta,EUROPE
+MH,Marshall Islands,OCEANIA
+MR,Mauritania,AFRICA
+MU,Mauritius,AFRICA
+YT,Mayotte,AFRICA
+MX,Mexico,AMERICAS
+FM,Micronesia,OCEANIA
+MD,Moldova,EUROPE
+MC,Monaco,EUROPE
+MN,Mongolia,ASIA
+ME,Montenegro,EUROPE
+MS,Montserrat,CARIBBEAN
+MA,Morocco,AFRICA
+MZ,Mozambique,AFRICA
+MM,Myanmar,ASIA
+NA,Namibia,AFRICA
+NR,Naoero,OCEANIA
+NP,Nepal,ASIA
+NL,Netherlands,EUROPE
+NC,New Caledonia,OCEANIA
+NZ,New Zealand,OCEANIA
+NI,Nicaragua,AMERICAS
+NE,Niger,AFRICA
+NG,Nigeria,AFRICA
+NU,Niue,OCEANIA
+KP,North Korea,ASIA
+MK,North Macedonia,EUROPE
+MP,Northern Mariana Islands,OCEANIA
+NO,Norway,EUROPE
+OM,Oman,MIDDLE EAST
+PK,Pakistan,ASIA
+PW,Palau Islands,OCEANIA
+PS,Palestinian Territory,MIDDLE EAST
+PA,Panama,AMERICAS
+PG,Papua New Guinea,OCEANIA
+PY,Paraguay,AMERICAS
+PE,Peru,AMERICAS
+PH,Philippines,ASIA
+PL,Poland,EUROPE
+PT,Portugal,EUROPE
+PR,Puerto Rico,CARIBBEAN
+QA,Qatar,MIDDLE EAST
+RE,Reunion,AFRICA
+RO,Romania,EUROPE
+RU,Russian Federation,EUROPE
+RW,Rwanda,AFRICA
+WS,Samoa,OCEANIA
+SM,San Marino,EUROPE
+SA,Saudi Arabia,MIDDLE EAST
+SN,Senegal,AFRICA
+RS,Serbia,EUROPE
+SC,Seychelles,AFRICA
+SL,Sierra Leone,AFRICA
+SG,Singapore,ASIA
+SK,Slovakia,EUROPE
+SI,Slovenia,EUROPE
+SB,Solomon Islands,OCEANIA
+SO,Somalia,AFRICA
+ZA,South Africa,AFRICA
+KR,South Korea,ASIA
+SS,South Sudan,AFRICA
+ES,Spain,EUROPE
+LK,Sri Lanka,ASIA
+SH,St. Helena,AFRICA
+KN,St. Kitts and Nevis,CARIBBEAN
+LC,St. Lucia,CARIBBEAN
+MF,St. Maarten,CARIBBEAN
+VC,St. Vincent and the Grenadines,CARIBBEAN
+SD,Sudan,AFRICA
+SR,Suriname,AMERICAS
+SE,Sweden,EUROPE
+CH,Switzerland,EUROPE
+SY,Syria,MIDDLE EAST
+ST,São Tomé and Príncipe,AFRICA
+TW,Taiwan (Chinese Taipei),ASIA
+TJ,Tajikistan,ASIA
+TZ,Tanzania,AFRICA
+TH,Thailand,ASIA
+BS,The Bahamas,CARIBBEAN
+GM,The Gambia,AFRICA
+TL,Timor-Leste,ASIA
+TG,Togo,AFRICA
+TO,Tonga,OCEANIA
+TT,Trinidad and Tobago,CARIBBEAN
+TN,Tunisia,AFRICA
+TM,Turkmenistan,ASIA
+TC,Turks and Caicos Islands,CARIBBEAN
+TV,Tuvalu,OCEANIA
+TR,Türkiye,EUROPE
+VI,US Virgin Islands,CARIBBEAN
+UG,Uganda,AFRICA
+UA,Ukraine,EUROPE
+AE,United Arab Emirates,MIDDLE EAST
+GB,United Kingdom,EUROPE
+US,United States,AMERICAS
+UY,Uruguay,AMERICAS
+UZ,Uzbekistan,ASIA
+VU,Vanuatu,OCEANIA
+VA,Vatican City,EUROPE
+VE,Venezuela,AMERICAS
+VN,Vietnam,ASIA
+YE,Yemen,MIDDLE EAST
+ZM,Zambia,AFRICA
+ZW,Zimbabwe,AFRICA
+SZ,eSwatini,AFRICA

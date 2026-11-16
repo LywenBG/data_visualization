@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <title>Borderless — Mettre les variables en relation</title>
+    <link rel="stylesheet" href="src/styles.css">
+</head>
+
+<body data-page="correlation">
+    <div class="shell">
+        <aside class="sidebar"><a href="carte.html" class="brand"><span class="brand-mark">✧</span> borderless<span
+                    style="color:#62ccb4">.</span></a>
+            <div class="nav-title">4 analyses · 4 techniques</div>
+            <nav class="nav" aria-label="Navigation entre les visualisations"><a class="nav-link "
+                    href="carte.html"><span class="nav-n">01</span>Carte et routes</a><a class="nav-link "
+                    href="matrice.html"><span class="nav-n">02</span>Matrice des visas</a><a class="nav-link active"
+                    href="correlation.html"><span class="nav-n">03</span>Corrélations</a><a class="nav-link "
+                    href="paralleles.html"><span class="nav-n">04</span>Profils multivariés</a><a class="nav-link"
+                    href="pipeline.html"><span class="nav-n">↳</span>Pipeline des données</a></nav>
+            <div class="sidebar-foot"><b>Un seul jeu de données enrichi</b>
+                <div>199 passeports · exigences de visa 2026 · routes internationales non datées.</div>
+                <div style="margin-top:10px">Projet universitaire · D3.js</div>
+            </div>
+        </aside>
+        <main class="workspace">
+            <div class="topbar">
+                <div class="breadcrumbs">Borderless / Technique 03 sur 04</div>
+                <div class="badge">Données intégrées · aucun import nécessaire</div>
+            </div>
+            <section class="hero">
+                <div>
+                    <p class="eyebrow">Technique 03 / Nuage de points multivarié</p>
+                    <h1>Mettre les variables en relation</h1>
+                    <p>Explorez les associations entre mobilité internationale et connectivité aérienne, puis examinez
+                        les pays atypiques.</p>
+                </div>
+                <div class="hero-side"><small>But de la technique</small><strong>Vérifier visuellement si les pays dont
+                        les passeports donnent accès à beaucoup de destinations présentent aussi une connectivité
+                        aérienne plus importante.</strong></div>
+            </section>
+            <div class="intro-copy"><span class="intro-accent">Pourquoi cette visualisation ?</span>
+                <p>Chaque pays est représenté par un point. Sa position compare les droits de mobilité de son passeport
+                    et les connexions aériennes internationales associées au pays. Le graphique permet aussi de repérer
+                    des exceptions à la tendance générale.</p>
+            </div>
+            <div class="notice">Périmètre : règles de visa documentées pour <b>2026</b> et réseau de routes aériennes
+                <b>sans année par liaison</b>. Les routes indiquent des connexions répertoriées, pas la fréquence des
+                vols ni une évolution annuelle.</div>
+            <section class="guide" aria-label="Guide de lecture">
+                <article class="guide-card">
+                    <h3>1 · Choisir les indicateurs</h3>
+                    <p>Définissez ce qui figure sur l’axe horizontal (visas) et vertical (connexions aériennes).</p>
+                </article>
+                <article class="guide-card">
+                    <h3>2 · Lire la tendance</h3>
+                    <p>Observez la direction du nuage de points et la droite pointillée. Le coefficient r résume
+                        l’association linéaire.</p>
+                </article>
+                <article class="guide-card">
+                    <h3>3 · Étudier les exceptions</h3>
+                    <p>Cliquez sur un point éloigné de la tendance : la fiche affiche ses valeurs pour comprendre
+                        pourquoi il se distingue.</p>
+                </article>
+            </section>
+            <div class="filter-heading">
+                <h2>Explorer les données</h2>
+                <p>Les sélections ci-dessous mettent à jour le graphique et la fiche détaillée sans téléverser de
+                    fichier.</p>
+            </div>
+            <div id="controls" class="filters" aria-label="Filtres interactifs"></div>
+            <div id="stats" class="stats"></div>
+            <div class="layout">
+                <section class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2 id="chartTitle">Nuage de points multivarié</h2>
+                            <p class="sub" id="chartSubtitle">Chargement des données réelles…</p>
+                        </div>
+                        <div id="chartAction"></div>
+                    </div>
+                    <div class="caption-row"><span class="micro" id="chartMicro"></span><span class="micro"
+                            id="selectionCount"></span></div>
+                    <div id="plot" class="plot">
+                        <div class="loading">Chargement des données et préparation de la visualisation…</div>
+                    </div>
+                    <div id="legend" class="legend"></div>
+                </section>
+                <aside class="panel details" id="details" aria-live="polite">
+                    <h3>Découvrir un détail</h3>
+                    <div class="empty-detail">Survolez les éléments pour obtenir une information rapide, puis
+                        <b>cliquez</b> sur un pays ou un point pour afficher son profil détaillé ici.</div>
+                </aside>
+            </div>
+            <div class="notes">
+                <section class="note">
+                    <h3>Comment lire cette visualisation ?</h3>
+                    <p id="howto"></p>
+                </section>
+                <section class="note">
+                    <h3>Transformations et limites des données</h3>
+                    <p id="pipeline"></p>
+                    <p><a class="fake-link" href="docs/PIPELINE.md">Voir le pipeline complet et le mapping visuel →</a>
+                    </p>
+                </section>
+            </div>
+            <section class="insight-notes" aria-label="Aide à l’interprétation">
+                <article class="insight-note">
+                    <h3>Comment interpréter une corrélation ?</h3>
+                    <p>Une tendance ascendante suggère que davantage de destinations accessibles s’accompagnent souvent
+                        de plus de connexions aériennes. Une tendance faible ou dispersée indique une association
+                        limitée. Le coefficient de Pearson r décrit cette relation, mais ne démontre pas que les droits
+                        de visa causent les routes.</p>
+                </article>
+                <article class="insight-note">
+                    <h3>Repères pour comprendre les données</h3>
+                    <p>La position horizontale est un nombre de destinations ; la verticale, un nombre de pays reliés ou
+                        de paires d’aéroports. La taille des cercles représente les paires d’aéroports sortantes
+                        distinctes. Une échelle racine carrée peut faciliter la lecture des pays moins connectés. Les
+                        différences géographiques, démographiques et économiques peuvent jouer un rôle.</p>
+                </article>
+            </section>
+            <div class="page-end">Borderless · Explorez des associations, pas des relations de cause à effet.</div>
+        </main>
+    </div>
+    <div class="tooltip" role="tooltip" id="tooltip"></div>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script type="module" src="src/app.js"></script>
+</body>
+
+</html>

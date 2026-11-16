@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <title>Borderless — Comparer les droits de voyage</title>
+    <link rel="stylesheet" href="src/styles.css">
+</head>
+
+<body data-page="matrice">
+    <div class="shell">
+        <aside class="sidebar"><a href="carte.html" class="brand"><span class="brand-mark">✧</span> borderless<span
+                    style="color:#62ccb4">.</span></a>
+            <div class="nav-title">4 analyses · 4 techniques</div>
+            <nav class="nav" aria-label="Navigation entre les visualisations"><a class="nav-link "
+                    href="carte.html"><span class="nav-n">01</span>Carte et routes</a><a class="nav-link active"
+                    href="matrice.html"><span class="nav-n">02</span>Matrice des visas</a><a class="nav-link "
+                    href="correlation.html"><span class="nav-n">03</span>Corrélations</a><a class="nav-link "
+                    href="paralleles.html"><span class="nav-n">04</span>Profils multivariés</a><a class="nav-link"
+                    href="pipeline.html"><span class="nav-n">↳</span>Pipeline des données</a></nav>
+            <div class="sidebar-foot"><b>Un seul jeu de données enrichi</b>
+                <div>199 passeports · exigences de visa 2026 · routes internationales non datées.</div>
+                <div style="margin-top:10px">Projet universitaire · D3.js</div>
+            </div>
+        </aside>
+        <main class="workspace">
+            <div class="topbar">
+                <div class="breadcrumbs">Borderless / Technique 02 sur 04</div>
+                <div class="badge">Données intégrées · aucun import nécessaire</div>
+            </div>
+            <section class="hero">
+                <div>
+                    <p class="eyebrow">Technique 02 / Matrice comparative des exigences de visa</p>
+                    <h1>Comparer les droits de voyage</h1>
+                    <p>Comparez plusieurs passeports sur les mêmes destinations, sans perdre de vue les catégories
+                        exactes des formalités.</p>
+                </div>
+                <div class="hero-side"><small>But de la technique</small><strong>Comparer rapidement les règles de visa
+                        de plusieurs passeports pour les mêmes destinations et repérer les inégalités de droits de
+                        déplacement.</strong></div>
+            </section>
+            <div class="intro-copy"><span class="intro-accent">Pourquoi cette visualisation ?</span>
+                <p>La matrice présente un couple « passeport → destination » par cellule. En comparant les couleurs
+                    d’une même colonne, on repère les différences de formalité sans devoir parcourir un pays après
+                    l’autre.</p>
+            </div>
+            <div class="notice">Périmètre : règles de visa documentées pour <b>2026</b> et réseau de routes aériennes
+                <b>sans année par liaison</b>. Les routes indiquent des connexions répertoriées, pas la fréquence des
+                vols ni une évolution annuelle.</div>
+            <section class="guide" aria-label="Guide de lecture">
+                <article class="guide-card">
+                    <h3>1 · Choisir deux passeports</h3>
+                    <p>Sélectionnez les nationalités à comparer. Les autres lignes fournissent des profils
+                        complémentaires ; le passeport principal ne change pas quand vous cliquez sur une cellule.</p>
+                </article>
+                <article class="guide-card">
+                    <h3>2 · Chercher une destination</h3>
+                    <p>Saisissez un pays, ou filtrez les destinations selon la catégorie de visa d’au moins un des deux
+                        passeports choisis.</p>
+                </article>
+                <article class="guide-card">
+                    <h3>3 · Lire une cellule</h3>
+                    <p>Cliquez sur une case : sa couleur indique l’exigence de visa, et la fiche affiche les liaisons
+                        directes recensées pour le couple.</p>
+                </article>
+            </section>
+            <div class="filter-heading">
+                <h2>Explorer les données</h2>
+                <p>Les sélections ci-dessous mettent à jour le graphique et la fiche détaillée sans téléverser de
+                    fichier.</p>
+            </div>
+            <div id="controls" class="filters" aria-label="Filtres interactifs"></div>
+            <div id="stats" class="stats"></div>
+            <div class="layout">
+                <section class="panel">
+                    <div class="panel-head">
+                        <div>
+                            <h2 id="chartTitle">Matrice comparative des exigences de visa</h2>
+                            <p class="sub" id="chartSubtitle">Chargement des données réelles…</p>
+                        </div>
+                        <div id="chartAction"></div>
+                    </div>
+                    <div class="caption-row"><span class="micro" id="chartMicro"></span><span class="micro"
+                            id="selectionCount"></span></div>
+                    <div id="plot" class="plot">
+                        <div class="loading">Chargement des données et préparation de la visualisation…</div>
+                    </div>
+                    <div id="legend" class="legend"></div>
+                </section>
+                <aside class="panel details" id="details" aria-live="polite">
+                    <h3>Découvrir un détail</h3>
+                    <div class="empty-detail">Survolez les éléments pour obtenir une information rapide, puis
+                        <b>cliquez</b> sur un pays ou un point pour afficher son profil détaillé ici.</div>
+                </aside>
+            </div>
+            <div class="notes">
+                <section class="note">
+                    <h3>Comment lire cette visualisation ?</h3>
+                    <p id="howto"></p>
+                </section>
+                <section class="note">
+                    <h3>Transformations et limites des données</h3>
+                    <p id="pipeline"></p>
+                    <p><a class="fake-link" href="docs/PIPELINE.md">Voir le pipeline complet et le mapping visuel →</a>
+                    </p>
+                </section>
+            </div>
+            <section class="insight-notes" aria-label="Aide à l’interprétation">
+                <article class="insight-note">
+                    <h3>Comment comparer deux passeports ?</h3>
+                    <p>Pour une même destination (une colonne), deux couleurs différentes signifient des formalités
+                        d’entrée différentes. L’objectif est d’identifier des écarts de mobilité. Les symboles ↗
+                        complètent la lecture en signalant l’existence de routes directes dans la base.</p>
+                </article>
+                <article class="insight-note">
+                    <h3>Repères pour comprendre les données</h3>
+                    <p>Une ligne représente le passeport utilisé ; une colonne, la destination. Les catégories de visa
+                        ne sont pas des notes de qualité : elles décrivent les formalités d’entrée. Une cellule « non
+                        renseigné » n’est pas une interdiction d’entrée.</p>
+                </article>
+            </section>
+            <div class="page-end">Borderless · Explorez des associations, pas des relations de cause à effet.</div>
+        </main>
+    </div>
+    <div class="tooltip" role="tooltip" id="tooltip"></div>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script type="module" src="src/app.js"></script>
+</body>
+
+</html>

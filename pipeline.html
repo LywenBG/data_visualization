@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <title>Borderless — Pipeline des données</title>
+  <meta name="description"
+    content="Du CSV brut aux quatre visualisations D3.js : sources, nettoyage, jointures, calculs, mapping visuel et limites de Borderless.">
+  <link rel="stylesheet" href="src/styles.css">
+  <link rel="stylesheet" href="src/pipeline.css">
+</head>
+
+<body data-page="pipeline">
+  <div class="shell">
+    <aside class="sidebar">
+      <a href="carte.html" class="brand"><span class="brand-mark">✧</span> borderless<span
+          style="color:#62ccb4">.</span></a>
+      <div class="nav-title">4 analyses · 4 techniques</div>
+      <nav class="nav" aria-label="Navigation du projet">
+        <a class="nav-link" href="carte.html"><span class="nav-n">01</span>Carte et routes</a>
+        <a class="nav-link" href="matrice.html"><span class="nav-n">02</span>Matrice des visas</a>
+        <a class="nav-link" href="correlation.html"><span class="nav-n">03</span>Corrélations</a>
+        <a class="nav-link" href="paralleles.html"><span class="nav-n">04</span>Profils multivariés</a>
+        <a class="nav-link active" aria-current="page" href="pipeline.html"><span class="nav-n">↳</span>Pipeline des
+          données</a>
+      </nav>
+      <div class="sidebar-foot"><b>Un seul jeu de données enrichi</b>
+        <div>199 passeports · exigences de visa 2026 · routes internationales non datées.</div>
+        <div style="margin-top:10px">Projet universitaire · D3.js</div>
+      </div>
+    </aside>
+    <main class="workspace pipeline-workspace" id="haut">
+      <div class="topbar">
+        <div class="breadcrumbs">Borderless / Méthodologie</div>
+        <div class="badge">Documentation du projet · données fixes</div>
+      </div>
+      <header class="pipeline-hero">
+        <p class="eyebrow">Documentation / Préparation & visualisation</p>
+        <h1>Du fichier brut à la visualisation</h1>
+        <p class="pipeline-lede">Comment avons-nous transformé plusieurs bases de données indépendantes en un jeu
+          cohérent permettant d'explorer les <strong>droits de voyage</strong> et les <strong>connexions
+            aériennes</strong> entre les pays ?</p>
+        <div class="pipeline-actions">
+          <a href="#parcours" class="action">Suivre les étapes ↓</a>
+          <a href="docs/PIPELINE.md" class="pipeline-outline-link">Lire le document Markdown ↗</a>
+        </div>
+      </header>
+
+      <nav class="pipeline-toc" aria-label="Sommaire de la page">
+        <a href="#sources">01 · Sources</a>
+        <a href="#parcours">02 · Transformations</a>
+        <a href="#jointures">Zoom · Jointures</a>
+        <a href="#calculs">03 · Indicateurs</a>
+        <a href="#mapping">04 · Mapping visuel</a>
+        <a href="#reproduire">Reproduire le traitement</a>
+        <a href="#limites">05 · Limites</a>
+      </nav>
+
+      <section class="pipeline-section" id="vue-ensemble" aria-labelledby="overview-heading">
+        <div class="pipeline-section-heading"><span class="pipeline-section-no">VUE GLOBALE</span>
+          <h2 id="overview-heading">Le pipeline en un coup d'œil</h2>
+          <p>Chaque étape prépare la suivante. Le site charge le résultat final automatiquement : aucun fichier à
+            téléverser.</p>
+        </div>
+        <div class="pipeline-flow" role="img"
+          aria-label="CSV bruts, puis harmonisation des pays, jointures et déduplication, agrégations, JSON final, puis quatre visualisations D3.js">
+          <div class="pipeline-flow-node"><span>01</span><b>Fichiers CSV</b><small>Passeports · visas · aéroports ·
+              routes</small></div>
+          <span class="pipeline-flow-arrow" aria-hidden="true">→</span>
+          <div class="pipeline-flow-node"><span>02</span><b>Nettoyage</b><small>Codes pays · catégories · valeurs
+              manquantes</small></div>
+          <span class="pipeline-flow-arrow" aria-hidden="true">→</span>
+          <div class="pipeline-flow-node"><span>03</span><b>Jointures</b><small>Routes → aéroports → pays</small></div>
+          <span class="pipeline-flow-arrow" aria-hidden="true">→</span>
+          <div class="pipeline-flow-node"><span>04</span><b>Calculs</b><small>Destinations · connexions · scores</small>
+          </div>
+          <span class="pipeline-flow-arrow" aria-hidden="true">→</span>
+          <div class="pipeline-flow-node final"><span>05</span><b>JSON + D3.js</b><small>4 vues interactives, mêmes
+              données</small></div>
+        </div>
+        <div class="pipeline-stats" aria-label="Volumes du jeu de données fourni">
+          <div><b>45 173</b><span>lignes de visas brutes</span></div>
+          <div><b>199</b><span>passeports classés en 2026</span></div>
+          <div><b>33 322</b><span>lignes de routes brutes</span></div>
+          <div><b>11 731</b><span>routes internationales distinctes retenues</span></div>
+        </div>
+      </section>
+
+      <section class="pipeline-section" id="sources" aria-labelledby="sources-heading">
+        <div class="pipeline-section-heading"><span class="pipeline-section-no">ÉTAPE 00</span>
+          <h2 id="sources-heading">Quelles données utilisons-nous ?</h2>
+          <p>Les fichiers n'ont pas la même structure. C'est la raison pour laquelle des transformations sont
+            nécessaires avant de pouvoir les croiser.</p>
+        </div>
+        <div class="pipeline-table-scroll">
+          <table class="pipeline-table">
+            <thead>
+              <tr>
+                <th>Fichier brut</th>
+                <th>Ce qu'il contient</th>
+                <th>Rôle dans l'analyse</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>visa_requirements.csv</code></td>
+                <td>Passeport, destination, formalité d'entrée</td>
+                <td>Colorer une destination et comparer les droits entre nationalités</td>
+              </tr>
+              <tr>
+                <td><code>passport_rankings.csv</code></td>
+                <td>Pays, rang et score de passeport en 2026</td>
+                <td>Conserver le score publié séparément des indicateurs calculés</td>
+              </tr>
+              <tr>
+                <td><code>countries.csv</code></td>
+                <td>Noms et codes des territoires</td>
+                <td>Associer les références des différents fichiers</td>
+              </tr>
+              <tr>
+                <td><code>routes.csv</code></td>
+                <td>Aéroport de départ, aéroport d'arrivée et liens recensés</td>
+                <td>Identifier les connexions aériennes orientées</td>
+              </tr>
+              <tr>
+                <td><code>airports.csv</code> et <code>airports-extended.csv</code></td>
+                <td>Code aéroport, pays, coordonnées</td>
+                <td>Retrouver les pays et localiser les liaisons</td>
+              </tr>
+              <tr>
+                <td><code>world.geojson</code></td>
+                <td>Frontières et géométries</td>
+                <td>Dessiner le fond de carte D3.js</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="pipeline-hint"><strong>Important.</strong> Les visas représentent la situation documentée pour
+          <strong>2026</strong> ; les routes ne comportent pas d'année exploitable par liaison. Les deux ensembles
+          peuvent être comparés descriptivement, pas étudiés comme des séries temporelles.</p>
+      </section>
+
+      <section class="pipeline-section" id="parcours" aria-labelledby="steps-heading">
+        <div class="pipeline-section-heading"><span class="pipeline-section-no">ÉTAPES 01 À 09</span>
+          <h2 id="steps-heading">Toutes les transformations, dans l'ordre</h2>
+          <p>Pour chaque étape, voici la donnée reçue, l'opération réalisée et ce qu'elle produit.</p>
+        </div>
+        <div class="pipeline-timeline">
+          <article class="pipeline-step">
+            <div class="pipeline-step-num">01</div>
+            <div>
+              <h3>Lire les fichiers et repérer les colonnes</h3>
+              <p>On parcourt les CSV pour identifier les colonnes utiles : pays d'origine du passeport, destination,
+                type de visa, identifiants et codes d'aéroports, rang et score.</p>
+              <div class="pipeline-transform"><span>Entrée</span> Lignes de CSV non reliées <span
+                  class="pipeline-transform-arrow">→</span> <span>Sortie</span> Structures tabulaires lisibles</div>
+            </div>
+          </article>
+          <article class="pipeline-step">
+            <div class="pipeline-step-num">02</div>
+            <div>
+              <h3>Normaliser les codes de pays</h3>
+              <p>Les CSV de visas utilisent déjà des codes pays ISO alpha-2 (<code>FR</code>, <code>JP</code>,
+                <code>DZ</code>). Nous vérifions les codes avec <code>countries.csv</code>, retirons les espaces et
+                convertissons en majuscules les codes pays <strong>et les codes IATA</strong> des aéroports. Exemple
+                réel : <code>tas</code> devient <code>TAS</code>.</p>
+              <div class="pipeline-transform"><span>Pourquoi ?</span> « France » dans un fichier et « FR » dans un autre
+                doivent désigner le même pays.</div>
+            </div>
+          </article>
+          <article class="pipeline-step">
+            <div class="pipeline-step-num">03</div>
+            <div>
+              <h3>Harmoniser les catégories de visa</h3>
+              <p>Chaque paire <code>passeport → destination</code> reçoit une catégorie normalisée, sans confondre
+                exemption de visa, visa à l'arrivée, ETA et e-visa. Les cas non renseignés restent identifiés comme
+                tels.</p>
+              <div class="pipeline-category-legend">
+                <span><i style="background:#16a085"></i>Sans visa</span><span><i style="background:#56a9dc"></i>À
+                  l'arrivée</span><span><i style="background:#8b83d5"></i>ETA</span><span><i
+                    style="background:#e8af55"></i>E-visa</span><span><i style="background:#dc8179"></i>Visa
+                  préalable</span><span><i style="background:#a75c76"></i>Entrée interdite</span><span><i
+                    style="background:#d9e3e1"></i>Non renseigné</span>
+              </div>
+            </div>
+          </article>
+          <article class="pipeline-step">
+            <div class="pipeline-step-num">04</div>
+            <div>
+              <h3>Relier chaque route à ses deux aéroports</h3>
+              <p>Dans le CSV ducling utilisé ici, les champs <code>dep</code> et <code>arr</code> sont des codes
+                <strong>IATA</strong> (par exemple <code>ABJ</code> et <code>ACC</code>). On effectue <strong>deux
+                  jointures</strong> avec <code>airports.csv</code> : une pour l’aéroport de départ, une pour celui
+                d’arrivée. On récupère ainsi les deux pays et leurs coordonnées. Le référentiel
+                <code>airports-extended.csv</code> sert au contrôle croisé de codes, sans écraser les coordonnées du
+                fichier ducling.</p>
+              <div class="pipeline-real-example"><span>Exemple réel après
+                  jointure</span><code>ABJ (CI) → ACC (GH)</code><small>Abidjan (Côte d’Ivoire) vers Accra (Ghana),
+                  présent dans le JSON final.</small></div>
+            </div>
+          </article>
+          <article class="pipeline-step">
+            <div class="pipeline-step-num">05</div>
+            <div>
+              <h3>Écarter les lignes inutilisables et dédupliquer</h3>
+              <p>Les liaisons domestiques ne sont pas utilisées pour la connectivité <strong>internationale</strong>.
+                Les routes impossibles à rattacher à des pays valides ne sont pas retenues. Enfin, plusieurs
+                enregistrements pour la même paire d'aéroports orientée sont regroupés.</p>
+              <div class="pipeline-count-flow">
+                <div><b>33 322</b><small>lignes initiales</small></div>
+                <div><b>2 439</b><small>non rattachées</small></div>
+                <div><b>16 417</b><small>domestiques écartées</small></div>
+                <div class="pipeline-highlight"><b>11 731</b><small>paires internationales uniques</small></div>
+              </div>
+              <p class="pipeline-small-note">Calcul exact : <strong>33 322 − 2 439 non rattachées − 16 417 domestiques =
+                  14 466 lignes internationales</strong>. Parmi elles, <strong>2 735</strong> répètent une paire
+                d’aéroports déjà rencontrée. On obtient <strong>11 731</strong> paires internationales orientées
+                distinctes. A → B et B → A restent deux routes différentes.</p>
+            </div>
+          </article>
+          <article class="pipeline-step">
+            <div class="pipeline-step-num">06</div>
+            <div>
+              <h3>Calculer les indicateurs par passeport et par pays</h3>
+              <p>On compte les destinations de chaque catégorie pour un passeport, puis les <strong>paires de routes
+                  internationales sortantes</strong> et les <strong>pays de destination différents</strong> pour un pays
+                de départ. Ces deux derniers indicateurs ne mesurent pas la même chose.</p>
+              <div class="pipeline-real-example"><span>Exemple d'indicateur
+                  dérivé</span><code>accessible = free + arrival + eta</code><small>Convention d'analyse propre à
+                  Borderless ; le score officiel Henley est conservé séparément.</small></div>
+            </div>
+          </article>
+          <article class="pipeline-step">
+            <div class="pipeline-step-num">07</div>
+            <div>
+              <h3>Fusionner les attributs sur un code pays commun</h3>
+              <p>On associe les comptes de visas et les mesures de connectivité au même pays. On obtient ainsi un profil
+                multivarié : destinations sans visa, destinations accessibles sans visa préalable, score, pays
+                connectés, routes sortantes…</p>
+              <div class="pipeline-transform"><span>Clé logique</span> <code>country_code</code> <span
+                  class="pipeline-transform-arrow">→</span> <span>Résultat</span> Un ensemble d'attributs comparables
+                par pays</div>
+            </div>
+          </article>
+          <article class="pipeline-step">
+            <div class="pipeline-step-num">08</div>
+            <div>
+              <h3>Enregistrer les données finales en JSON local</h3>
+              <p>Le traitement prépare <code>data/borderless-fixed.json</code>, composé notamment de <code>matrix</code>
+                (visas entre pays), <code>routes</code> (liaisons normalisées), <code>history</code> (classements
+                disponibles) et <code>coverage</code> (contrôles de couverture).</p>
+              <div class="pipeline-code">
+                <div>Extrait simplifié du format de sortie</div>
+                <pre><code>{
+  "matrix": { "FR": { "JP": "free", "US": "eta" } },
+  "routes": [{ "from": "CI", "to": "GH", "src": "ABJ", "dst": "ACC" }],
+  "history": [{ "passport": "FR", "year": 2026, "score": 186 }]
+}</code></pre>
+              </div>
+              <p class="pipeline-small-note">L'extrait conserve des valeurs présentes dans le fichier, mais omet
+                volontairement de nombreuses propriétés pour illustrer la structure.</p>
+            </div>
+          </article>
+          <article class="pipeline-step">
+            <div class="pipeline-step-num">09</div>
+            <div>
+              <h3>Charger le JSON et construire les quatre visualisations D3</h3>
+              <p>Au chargement du site, <code>src/app.js</code> lit le JSON et <code>data/world.geojson</code>, prépare
+                les regroupements utilisés par les filtres et applique les représentations visuelles de chaque page.
+                Survol, sélection, recherche et détails permettent ensuite l'exploration.</p>
+              <div class="pipeline-transform"><span>Entrée</span> JSON enrichi + GeoJSON <span
+                  class="pipeline-transform-arrow">→</span> <span>Sortie</span> Carte · matrice · corrélation · profils
+                multivariés</div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+
+      <section class="pipeline-section" id="jointures" aria-labelledby="joins-heading">
+        <div class="pipeline-section-heading">
+          <span class="pipeline-section-no">EXEMPLE PRATIQUE · POUR LA SOUTENANCE</span>
+          <h2 id="joins-heading">Comprendre les jointures, concrètement</h2>
+          <p>Le problème est simple : un fichier nous dit <em>quel avion relie quels aéroports</em>, l’autre nous dit
+            <em>dans quels pays se trouvent ces aéroports</em>. Il faut les rapprocher pour comparer ce réseau aux
+            passeports.</p>
+        </div>
+
+        <div class="pipeline-measure-grid">
+          <article>
+            <h3>1 · Qu’est-ce qu’une clé de jointure ?</h3>
+            <p>C’est un champ commun aux deux tables. Dans les routes, <code>dep = ABJ</code> ; dans les aéroports,
+              <code>iata = ABJ</code>. Cette égalité permet d’ajouter le pays <code>CI</code> et la géolocalisation
+              d’Abidjan à la route. Même opération pour l’arrivée.</p>
+          </article>
+          <article>
+            <h3>2 · Pourquoi deux jointures ?</h3>
+            <p>Une seule ligne de route a <strong>deux extrémités</strong>. Nous associons <code>routes.dep</code> aux
+              aéroports de départ, puis <code>routes.arr</code> aux aéroports d’arrivée : on obtient <code>from</code>,
+              <code>to</code> et deux couples de coordonnées.</p>
+          </article>
+          <article>
+            <h3>3 · Pourquoi grouper les lignes ?</h3>
+            <p>Sur la route <code>ABJ → ACC</code>, cinq compagnies apparaissent dans le CSV. Pour notre indicateur,
+              cela représente <strong>une seule paire d’aéroports</strong> ; on garde <code>rows = 5</code> comme
+              information sur les cinq enregistrements.</p>
+          </article>
+        </div>
+
+        <div class="pipeline-table-scroll" style="margin-top:16px">
+          <table class="pipeline-table">
+            <thead>
+              <tr>
+                <th>Table d’origine</th>
+                <th>Valeur observée</th>
+                <th>Interprétation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>routes.csv</code></td>
+                <td><code>dep=ABJ, arr=ACC, airline=2J</code></td>
+                <td>La liaison existe dans le CSV, mais aucun pays n’est présent dans cette ligne.</td>
+              </tr>
+              <tr>
+                <td><code>airports.csv</code> (départ)</td>
+                <td><code>iata=ABJ, country=CI, lat=5.26139, lon=-3.92629</code></td>
+                <td>La première jointure retrouve la Côte d’Ivoire et les coordonnées de départ.</td>
+              </tr>
+              <tr>
+                <td><code>airports.csv</code> (arrivée)</td>
+                <td><code>iata=ACC, country=GH, lat=5.60519, lon=-0.166786</code></td>
+                <td>La seconde jointure retrouve le Ghana et les coordonnées d’arrivée.</td>
+              </tr>
+              <tr>
+                <td><strong>Après jointure</strong></td>
+                <td><code>from=CI, to=GH, src=ABJ, dst=ACC</code></td>
+                <td>Une liaison entre deux pays, géolocalisable et comparable aux exigences de visa.</td>
+              </tr>
+              <tr>
+                <td><strong>Après déduplication</strong></td>
+                <td><code>ABJ → ACC, rows=5</code></td>
+                <td>Cinq lignes de compagnies regroupées en une route orientée distincte.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pipeline-code">
+          <div>Logique de la double jointure — pseudo-SQL pédagogique</div>
+          <pre><code>SELECT r.dep, r.arr,
+       depart.country AS from_country,
+       arrivee.country AS to_country
+FROM routes r
+JOIN airports depart ON UPPER(TRIM(r.dep)) = depart.iata
+JOIN airports arrivee ON UPPER(TRIM(r.arr)) = arrivee.iata
+WHERE depart.country != arrivee.country;</code></pre>
+        </div>
+        <p class="pipeline-small-note">Le programme livré effectue ces jointures en Python avec un dictionnaire
+          <code>code IATA → fiche aéroport</code>. Le pseudo-SQL explique la logique ; il n’y a pas de base SQL dans
+          l’application.</p>
+
+        <div class="pipeline-real-example" style="margin-top:16px">
+          <span>Un nettoyage qui change réellement le résultat</span>
+          <code>routes.csv : dep=JED, arr=tas → normalisation → JED → TAS</code>
+          <small>La ligne 32 459 du CSV contient l’arrivée <code>tas</code> en minuscules. Sans mise en majuscules, on
+            manquerait cette liaison Arabie saoudite (<code>SA</code>) → Ouzbékistan (<code>UZ</code>). Grâce à cette
+            règle, la reconstruction donne exactement les mêmes <strong>11 731</strong> routes que le site.</small>
+        </div>
+
+        <div class="pipeline-count-flow" aria-label="Calcul du nombre de routes" style="margin-top:17px">
+          <div><b>33 322</b><small>enregistrements de routes</small></div>
+          <div><b>− 2 439</b><small>sans deux aéroports identifiables</small></div>
+          <div><b>− 16 417</b><small>routes au sein d’un même pays</small></div>
+          <div class="pipeline-highlight"><b>14 466</b><small>lignes internationales avant déduplication</small></div>
+        </div>
+        <p class="pipeline-hint">Enfin : <strong>14 466 − 2 735 répétitions = 11 731 paires internationales orientées
+            distinctes</strong>. Ce total correspond au fichier JSON utilisé par les quatre visualisations.</p>
+
+        <div class="pipeline-section-heading" style="margin-top:28px">
+          <h2>Et pour les passeports ?</h2>
+          <p>Les fichiers des visas contiennent déjà des codes pays communs. La jointure n’a donc pas besoin de traduire
+            des noms : elle relie les lignes par leur code ISO2.</p>
+        </div>
+        <div class="pipeline-table-scroll">
+          <table class="pipeline-table">
+            <thead>
+              <tr>
+                <th>Fichier</th>
+                <th>Exemple réel</th>
+                <th>Après transformation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>visa_requirements.csv</code></td>
+                <td><code>from_country_code=FR, to_country_code=JP, requirement_type=visa_free_access</code></td>
+                <td><code>matrix["FR"]["JP"] = "free"</code></td>
+              </tr>
+              <tr>
+                <td><code>visa_requirements.csv</code></td>
+                <td>
+                  <code>from_country_code=FR, to_country_code=US, requirement_type=electronic_travel_authorisation</code>
+                </td>
+                <td><code>matrix["FR"]["US"] = "eta"</code></td>
+              </tr>
+              <tr>
+                <td><code>passport_rankings.csv</code></td>
+                <td><code>country_code, year, rank, visa_free_count</code></td>
+                <td><code>history[] : passport, year, rank, score</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="pipeline-small-note">Dans <code>src/app.js</code>, la clé du pays (par exemple <code>FR</code>) permet
+          ensuite de combiner les comptes de visas et les routes sortantes. C’est la construction du <strong>profil
+            multivarié</strong> utilisé par le nuage de points et les coordonnées parallèles.</p>
+      </section>
+
+      <section class="pipeline-section" id="reproduire" aria-labelledby="rebuild-heading">
+        <div class="pipeline-section-heading"><span class="pipeline-section-no">PIPELINE REPRODUCTIBLE</span>
+          <h2 id="rebuild-heading">Reconstruire les données soi-même</h2>
+          <p>Les trois archives Kaggle sont conservées telles quelles dans <code>data/raw/</code>. Le script Python ne
+            modifie pas les fichiers d’origine ni le JSON actif du site.</p>
+        </div>
+        <div class="pipeline-table-scroll">
+          <table class="pipeline-table">
+            <thead>
+              <tr>
+                <th>Archive d’origine</th>
+                <th>Emplacement dans DataViz</th>
+                <th>Utilisation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>OpenFlights · aéroports étendus</td>
+                <td><code>data/raw/01_airports_openflights/</code></td>
+                <td>Contrôle croisé : <strong>3 911</strong> codes IATA correspondent aussi au référentiel principal.
+                </td>
+              </tr>
+              <tr>
+                <td>Passeports et visas</td>
+                <td><code>data/raw/02_passeports_visas/</code></td>
+                <td>Référentiel de 227 destinations, 45 173 règles de visa et 199 classements.</td>
+              </tr>
+              <tr>
+                <td>ducling · routes et aéroports</td>
+                <td><code>data/raw/03_routes_ducling/</code></td>
+                <td>Deux jointures IATA et calcul des routes. Les fichiers <code>alliances.csv</code>,
+                  <code>airlines.csv</code> et <code>equipment.csv</code> sont archivés, mais pas exploités dans les
+                  quatre indicateurs actuels.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pipeline-code">
+          <div>Depuis le dossier DataViz</div>
+          <pre><code>python3 scripts/prepare_data.py --check</code></pre>
+        </div>
+        <p class="pipeline-hint">Le script génère <code>data/processed/borderless-rebuilt.json</code>, compare la
+          matrice des visas, les classements et les liaisons au fichier actif <code>data/borderless-fixed.json</code>,
+          puis confirme l’<strong>identité complète</strong> du résultat. Les fichiers utilisés par les pages D3 restent
+          inchangés.</p>
+        <p class="pipeline-small-note">Pour le détail des clés, des formules et des contrôles qualité : <a
+            href="docs/PIPELINE.md">ouvrir la documentation complète</a>. Le script n’utilise que Python 3, sans
+          bibliothèque additionnelle.</p>
+      </section>
+
+      <section class="pipeline-section" id="calculs" aria-labelledby="measures-heading">
+        <div class="pipeline-section-heading"><span class="pipeline-section-no">MESURES DÉRIVÉES</span>
+          <h2 id="measures-heading">Ce que signifient les indicateurs calculés</h2>
+          <p>Les calculs rendent possible la comparaison entre deux variables d'origine différente : les visas et les
+            connexions aériennes.</p>
+        </div>
+        <div class="pipeline-measure-grid">
+          <article>
+            <h3>Destinations « sans visa »</h3>
+            <p>Nombre de destinations classées <code>free</code> pour le passeport étudié, à l'exclusion du pays du
+              passeport lui-même.</p>
+          </article>
+          <article>
+            <h3>Accessibles sans visa préalable</h3>
+            <p><code>free + arrival + eta</code> : indicateur construit pour Borderless. Les e-visas restent comptés à
+              part.</p>
+          </article>
+          <article>
+            <h3>Routes sortantes</h3>
+            <p>Nombre de paires <code>aéroport départ → aéroport arrivée</code> internationales, orientées et
+              distinctes, répertoriées dans le fichier.</p>
+          </article>
+          <article>
+            <h3>Pays reliés</h3>
+            <p>Nombre de pays étrangers distincts vers lesquels au moins une route internationale sortante est recensée.
+            </p>
+          </article>
+          <article>
+            <h3>Score et rang du passeport</h3>
+            <p>Indicateurs repris du classement source, non recalculés à partir de nos propres catégories.</p>
+          </article>
+          <article>
+            <h3>Corrélation entre variables</h3>
+            <p>Le nuage de points utilise la corrélation de Pearson <code>r</code> pour résumer une association
+              linéaire, sans démontrer une causalité.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="pipeline-section" id="mapping" aria-labelledby="mapping-heading">
+        <div class="pipeline-section-heading"><span class="pipeline-section-no">DATA → VISUALISATION</span>
+          <h2 id="mapping-heading">Comment les données deviennent des éléments visuels</h2>
+          <p>Le <strong>mapping visuel</strong> est le choix de l'attribut représenté par une position, une couleur, une
+            taille ou une ligne. Chaque technique répond à une tâche différente.</p>
+        </div>
+        <div class="pipeline-mappings">
+          <a href="carte.html" class="pipeline-mapping-card"><span class="pipeline-mapping-n">01 · CARTE</span>
+            <h3>Localiser et relier</h3>
+            <p><strong>Position :</strong> géométrie des pays ; <strong>couleur :</strong> catégorie du visa ;
+              <strong>arc :</strong> présence d'au moins une connexion aérienne répertoriée. Zoom et clic pour obtenir
+              un détail.</p><span>Explorer la carte ↗</span>
+          </a>
+          <a href="matrice.html" class="pipeline-mapping-card"><span class="pipeline-mapping-n">02 · MATRICE</span>
+            <h3>Comparer des règles</h3>
+            <p><strong>Lignes :</strong> passeports ; <strong>colonnes :</strong> destinations ; <strong>couleur de
+                cellule :</strong> formalité du visa ; <strong>symbole ↗ :</strong> connexion directe répertoriée.</p>
+            <span>Explorer la matrice ↗</span>
+          </a>
+          <a href="correlation.html" class="pipeline-mapping-card"><span class="pipeline-mapping-n">03 · NUAGES DE
+              POINTS</span>
+            <h3>Chercher une association</h3>
+            <p><strong>X :</strong> droits de mobilité ; <strong>Y :</strong> connectivité aérienne ; <strong>taille
+                :</strong> routes sortantes ; <strong>surbrillance :</strong> pays étudié ; droite de tendance et
+              <code>r</code>.</p><span>Explorer la corrélation ↗</span>
+          </a>
+          <a href="paralleles.html" class="pipeline-mapping-card"><span class="pipeline-mapping-n">04 · COORDONNÉES
+              PARALLÈLES</span>
+            <h3>Comparer des profils complets</h3>
+            <p><strong>Axes :</strong> cinq indicateurs quantitatifs ; <strong>hauteur :</strong> valeur sur l'axe ;
+              <strong>ligne :</strong> pays ; <strong>orange/bleu :</strong> comparaison ; brossage pour filtrer.</p>
+            <span>Explorer les profils ↗</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="pipeline-section" id="limites" aria-labelledby="limits-heading">
+        <div class="pipeline-section-heading"><span class="pipeline-section-no">QUALITÉ & INTERPRÉTATION</span>
+          <h2 id="limits-heading">Ce que les résultats permettent — et ne permettent pas — de conclure</h2>
+          <p>Ces limites font partie de la démarche scientifique et sont prises en compte dans le choix des quatre
+            tâches.</p>
+        </div>
+        <div class="pipeline-limits">
+          <article>
+            <h3>Une seule année pour les visas</h3>
+            <p>Les droits de visa fournis portent sur 2026. Sans historique année par année, il est impossible de
+              conclure à leur évolution passée avec ces fichiers.</p>
+          </article>
+          <article>
+            <h3>Aucune année fiable par liaison</h3>
+            <p>Le fichier de routes ne permet pas de compter les connexions sortantes par année. Une date de publication
+              Kaggle ne correspond pas à la date d'ouverture d'une route.</p>
+          </article>
+          <article>
+            <h3>Une route n'est pas un vol</h3>
+            <p>La présence d'une liaison enregistrée ne donne ni fréquence de vols, ni nombre de passagers, ni
+              disponibilité actuelle d'un billet.</p>
+          </article>
+          <article>
+            <h3>Association ≠ causalité</h3>
+            <p>Si les pays disposant de passeports plus puissants ont plus de routes, cette corrélation ne prouve pas
+              que les droits de visa ont créé ces connexions.</p>
+          </article>
+        </div>
+        <div class="pipeline-endnote"><strong>À retenir</strong>
+          <p>Le pipeline transforme des fichiers tabulaires isolés en un jeu de données multivarié commun, documenté et
+            utilisable dans quatre techniques interactives. Le site reste un outil d'exploration des données
+            disponibles, pas un service de réservation ou une référence réglementaire.</p>
+        </div>
+      </section>
+
+      <footer class="pipeline-footer"><a href="#haut">↑ Retour en haut</a><a href="docs/PIPELINE.md">Documentation
+          Markdown complète ↗</a><a href="carte.html">Revenir aux visualisations →</a></footer>
+      <div class="page-end">Borderless · Pipeline de préparation des données · 2026</div>
+    </main>
+  </div>
+</body>
+
+</html>

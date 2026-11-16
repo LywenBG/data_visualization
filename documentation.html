@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Borderless — Méthode</title>
+    <link rel="stylesheet" href="src/styles.css">
+</head>
+
+<body>
+    <main class="workspace" style="max-width:950px"><a href="carte.html" class="chip">← Retour aux 4 visualisations</a>
+        <p class="eyebrow" style="margin-top:30px">Méthode scientifique</p>
+        <h1 style="font-family:Manrope;font-size:36px">Données, transformations et mappings</h1>
+        <p style="line-height:1.8;color:#557276">Le rapport complet et reproductible se trouve dans le dépôt :
+            <code>docs/PIPELINE.md</code>. Cette page résume le parcours et les limitations de l'étude.</p>
+        <div class="notes">
+            <article class="note">
+                <h3>1. Données brutes</h3>
+                <p>Exigences de visa 2026, classements de passeports 2026 et routes aériennes sans année par liaison,
+                    rapprochées des référentiels d’aéroports et de pays.</p>
+            </article>
+            <article class="note">
+                <h3>2. Normalisation</h3>
+                <p>Codes ISO alpha-2, traitement des valeurs absentes et harmonisation des catégories de visa sans
+                    confondre ETA, e-visa et exemptions.</p>
+            </article>
+            <article class="note">
+                <h3>3. Jointures</h3>
+                <p>Routes reliées aux aéroports pour récupérer le pays d'origine et celui de destination. Déduplication
+                    par paire aéroport d’origine → aéroport d’arrivée.</p>
+            </article>
+            <article class="note">
+                <h3>4. Calculs</h3>
+                <p>Comptes de destinations par catégorie de visa, pays connectés et paires de routes internationales,
+                    puis sélection d'attributs pour les vues D3.</p>
+            </article>
+            <article class="note">
+                <h3>5. Mapping visuel</h3>
+                <p>Carte : couleur/position/arcs. Matrice : lignes/colonnes/couleurs. Scatter : axes/rayons. Coordonnées
+                    parallèles : axes/lignes/gradients.</p>
+            </article>
+            <article class="note">
+                <h3>6. Portée</h3>
+                <p>Analyse descriptive entre pays, pas évolution temporelle. Les années des données ne sont pas alignées
+                    au niveau de chaque route. Pas de causalité inférée.</p>
+            </article>
+        </div>
+        <p class="notice" style="margin-top:26px">Toutes les tâches proposées par les quatre pages sont exécutables avec
+            les données fixes intégrées. Aucun historique annuel artificiel n'est créé.</p><a class="action"
+            href="carte.html">Explorer la première page →</a>
+    </main>
+</body>
+
+</html>
