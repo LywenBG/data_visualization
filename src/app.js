@@ -116,15 +116,19 @@ function drawMap(){
   .on('click',clickMapCountry)
   .on('keydown',(e,d)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();clickMapCountry(e,d)}});
  if(state.routesVisible){
-   const from=featureByCode.get(state.passport);
-   if(from){
-     const origin=d3.geoCentroid(from),seen=new Set();
+   if(featureByCode.has(state.passport)){
+     const seen=new Set();
      const layer=g.append('g').attr('class','map-routes').style('pointer-events','none');
      for(const route of routeSummary(state.passport).rows){
-       if(seen.has(route.to))continue;seen.add(route.to);if(state.category!=='all'&&category(state.passport,route.to)!==state.category)continue;
-       const to=featureByCode.get(route.to);if(!to)continue;
-       const dest=d3.geoCentroid(to);
-       const coords=d3.range(0,1.001,.06).map(t=>d3.geoInterpolate(origin,dest)(t));
+       if(seen.has(route.to))continue;
+       if(state.category!=='all'&&category(state.passport,route.to)!==state.category)continue;
+       if(!featureByCode.has(route.to))continue;
+       const origin=route.sourceCoord,dest=route.targetCoord;
+       const valid=coord=>Array.isArray(coord)&&coord.length===2&&Number.isFinite(coord[0])&&Number.isFinite(coord[1])&&Math.abs(coord[0])<=180&&Math.abs(coord[1])<=90;
+       if(!valid(origin)||!valid(dest))continue;
+       seen.add(route.to);
+       const interpolate=d3.geoInterpolate(origin,dest);
+       const coords=d3.range(0,1.001,.06).map(t=>interpolate(t));
        layer.append('path').datum({type:'LineString',coordinates:coords}).attr('d',path)
         .attr('fill','none').attr('stroke','#155d64').attr('stroke-width',1.15).attr('stroke-opacity',.5);
      }

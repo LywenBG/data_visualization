@@ -289,4 +289,6 @@ Il faut toutefois préciser à l'oral :
 4. Le référentiel OpenFlights étendu est **une source de contrôle**, pas un enrichissement qui aurait été ajouté silencieusement au dataset final.
 5. Une corrélation entre les deux familles de variables n'établit **aucune causalité**.
 
+### 7.9. Formulation courte pour la présentation
 
+> « Nous avons trois archives de données : les droits de visa et classements, les routes aériennes, et un référentiel complémentaire d'aéroports. Nous avons normalisé les codes ISO des pays et les codes IATA des aéroports. Ensuite, chaque route a été jointe deux fois au référentiel aéroportuaire, pour identifier son pays de départ et son pays d'arrivée. Nous avons supprimé les routes non rattachables et les trajets domestiques, puis regroupé les doublons : 33 322 lignes brutes donnent 11 731 paires internationales distinctes. Nous avons aussi normalisé les catégories de visa et relié les indicateurs par code pays. Le résultat est un JSON multivarié commun aux quatre visualisations D3. Le script fourni permet de reconstruire exactement le fichier utilisé par le site. »
