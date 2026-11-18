@@ -10,3 +10,7 @@ check:
 	python3 tests/check_interface.py
 check-visual:
 	python3 tests/check_layout_browser.py
+
+# Vérification du scénario de navigation
+check-story:
+	node tests/check_story_flow.js

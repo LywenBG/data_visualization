@@ -12,6 +12,62 @@ const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;
 const fmt=new Intl.NumberFormat('fr-FR');
 const stat=(value)=>value==null?'—':fmt.format(value);
 const state={passport:'FR',compare:'DZ',category:'all',country:'',selected:'',metric:'routes',sort:'score',brush:{},selectedSeries:null,xMetric:'accessible',yMetric:'connected',yScale:'sqrt',colorMetric:'accessible',routesVisible:true,mapTransform:null,selectedPair:''};
+// Contexte d'enquête commun aux quatre pages, conservé seulement dans cet onglet.
+const journey={origin:'FR',compare:'DZ',destination:'',focusOrigin:'',examined:''};
+function saveJourney(patch={}){
+ Object.assign(journey,patch);
+ try{sessionStorage.setItem('borderless.journey.v1',JSON.stringify(journey))}catch{}
+ renderJourney();
+}
+function journeyHref(destinationPage){
+ const origin=page==='matrice'&&destinationPage==='carte'&&byCode.has(journey.focusOrigin)?journey.focusOrigin:state.passport;
+ const q=new URLSearchParams({passport:origin,compare:state.compare});
+ if(journey.destination&&countries.includes(journey.destination))q.set('destination',journey.destination);
+ if(journey.examined&&byCode.has(journey.examined))q.set('examined',journey.examined);
+ return `${destinationPage}.html?${q.toString()}`;
+}
+function renderJourney(){
+ if(!data||typeof document.querySelectorAll!=='function')return;
+ const current=$('#storyContext'),carry=$('#storyCarry');
+ if(!current&&!carry)return;
+ const origin=state.passport,ref=byCode.get(origin),other=byCode.get(state.compare);
+ const destination=journey.destination&&countries.includes(journey.destination)?journey.destination:'';
+ const compared=other?` Comparaison : ${other.name}.`:'';
+ const target=destination?` Destination suivie : ${label(destination)}.`:'';
+ if(current)current.textContent=`Passeport étudié : ${label(origin)}.${compared}${target} Les choix restent disponibles quand vous changez de page.`;
+ const follow=page==='matrice'&&byCode.has(journey.focusOrigin)?journey.focusOrigin:origin;
+ const focusCountry=byCode.get(journey.examined)||other;
+ if(carry){
+  if(page==='matrice')carry.textContent=destination?
+    `Pour poursuivre : examiner sur la carte ${label(follow)} → ${label(destination)}. La carte reprend le pays et la destination de la cellule sélectionnée.`:
+    `Choisissez deux passeports, puis cliquez sur une cellule qui vous intrigue. À l'étape suivante, vous retrouverez la nationalité sélectionnée${compared}`;
+  if(page==='carte'){
+   const n=destination?connected(origin,destination).length:null;
+   carry.textContent=destination?`${label(origin)} → ${label(destination)} : ${labels[category(origin,destination)]||labels.unknown.toLowerCase()} ; ${n} paire(s) d'aéroports sortante(s) répertoriée(s). Une absence dans la base ne démontre pas qu'aucun vol réel n'existe. Étape suivante : est-ce une association qu'on observe aussi pour les autres pays ?`:
+    `Depuis ${label(origin)}, comparez les destinations colorées et les routes tracées. Pour conserver une destination dans votre enquête, faites Maj + clic dessus, puis explorez la relation globale.`;
+  }
+  if(page==='correlation')carry.textContent=ref&&other?
+   `${ref.name} : ${stat(ref.accessible)} destinations accessibles selon notre convention et ${stat(ref.connected)} pays reliés par des routes sortantes ; ${other.name} : ${stat(other.accessible)} destinations accessibles et ${stat(other.connected)} pays reliés. Étape suivante : pourquoi leurs profils sont-ils différents ?`:
+   `Choisissez un point pour l'examiner à l'étape suivante. La corrélation indique une association descriptive, jamais une cause.`;
+  if(page==='paralleles')carry.textContent=ref&&focusCountry?
+   `Bilan de l'enquête : ${ref.name} compte ${stat(ref.free)} destinations strictement sans visa et ${stat(ref.routes)} routes sortantes distinctes enregistrées ; ${focusCountry.name} en compte ${stat(focusCountry.free)} et ${stat(focusCountry.routes)}. Vous pouvez comparer les autres catégories et discuter les limites du dataset.`:
+   `Comparez les cinq axes et choisissez un autre profil pour étudier un cas différent. Les routes ne sont pas datées.`;
+ }
+ const next=$('#storyNext');if(next){
+  const path=page==='matrice'?'carte':page==='carte'?'correlation':page==='correlation'?'paralleles':'matrice';
+  next.href=journeyHref(path);
+ }
+ const prev=$('#storyPrevious');if(prev){
+  const path=page==='carte'?'matrice':page==='correlation'?'carte':'correlation';
+  prev.href=journeyHref(path);
+ }
+ // Les quatre raccourcis de l'étape possèdent le même contexte que Suivant/Précédent.
+ document.querySelectorAll('.story-step').forEach(a=>{
+  const path=a.getAttribute('href')?.replace(/\.html.*$/,'');
+  if(['matrice','carte','correlation','paralleles'].includes(path))a.href=journeyHref(path);
+ });
+}
+
 const tooltip=$('#tooltip');
 let data,geo,countries=[],profiles=[],byCode=new Map(),routeByCountry=new Map(),routeByPair=new Map();
 const setText=(id,value)=>{const el=$(id);if(el)el.textContent=value};
@@ -36,6 +92,7 @@ function choosePassport(code,source='select'){
  state.selected=page==='paralleles'&&examined!==code&&byCode.has(examined)?examined:code;
  state.selectedPair='';
  try{sessionStorage.setItem('borderless.passport',code)}catch{}
+ saveJourney({origin:code,focusOrigin:'',destination:journey.destination===code?'':journey.destination});
  renderAll();
  if(page==='carte')setDetail(code,source==='map'
   ?`Passeport de ${label(code)} choisi directement sur la carte : les couleurs, les routes et les indicateurs ont été recalculés. Maj + clic sur une autre destination permet de consulter son exigence de visa sans changer de passeport.`
@@ -48,12 +105,12 @@ function renderControls(){const ctl=$('#controls');const passport=countrySelect(
  if(page==='correlation')ctl.innerHTML=`<div class="field"><label for="xMetric">Axe horizontal</label><select id="xMetric"><option value="accessible" ${state.xMetric==='accessible'?'selected':''}>Destinations accessibles sans visa préalable</option><option value="free" ${state.xMetric==='free'?'selected':''}>Destinations strictement sans visa</option><option value="required" ${state.xMetric==='required'?'selected':''}>Destinations avec visa préalable</option></select></div><div class="field"><label for="yMetric">Axe vertical</label><select id="yMetric"><option value="connected" ${state.yMetric==='connected'?'selected':''}>Pays reliés par avion</option><option value="routes" ${state.yMetric==='routes'?'selected':''}>Paires d'aéroports sortantes</option></select></div><div class="field"><label for="yScale">Répartition verticale</label><select id="yScale"><option value="sqrt" ${state.yScale==='sqrt'?'selected':''}>Racine carrée (points lisibles)</option><option value="linear" ${state.yScale==='linear'?'selected':''}>Linéaire (valeurs réelles)</option></select></div>`+passport;
  if(page==='paralleles')ctl.innerHTML=passport+countrySelect('profilePicker',state.selected||state.passport,null,'Pays à examiner')+`<div class="field"><label for="colorMetric">Couleur des lignes</label><select id="colorMetric"><option value="accessible" ${state.colorMetric==='accessible'?'selected':''}>Accès sans visa préalable</option><option value="connected" ${state.colorMetric==='connected'?'selected':''}>Pays reliés</option></select></div><button type="button" class="action" id="clearBrush">Effacer les filtres d'axes</button>`;
  ctl.querySelector('#passport')?.addEventListener('change',e=>choosePassport(e.target.value,'select'));
- ctl.querySelector('#compare')?.addEventListener('change',e=>{state.compare=e.target.value;state.selectedPair='';renderAll()});
+ ctl.querySelector('#compare')?.addEventListener('change',e=>{state.compare=e.target.value;state.selectedPair='';saveJourney({compare:state.compare});renderAll()});
  ctl.querySelector('#category')?.addEventListener('change',e=>{state.category=e.target.value;renderAll()});
  ctl.querySelector('#countrySearch')?.addEventListener('input',e=>{state.country=e.target.value;drawMatrix()});
  ctl.querySelector('#routesToggle')?.addEventListener('change',e=>{state.routesVisible=e.target.checked;drawMap()});
  ctl.querySelector('#xMetric')?.addEventListener('change',e=>{state.xMetric=e.target.value;drawScatter()});ctl.querySelector('#yMetric')?.addEventListener('change',e=>{state.yMetric=e.target.value;drawScatter()});ctl.querySelector('#yScale')?.addEventListener('change',e=>{state.yScale=e.target.value;drawScatter()});
- ctl.querySelector('#profilePicker')?.addEventListener('change',e=>{state.selected=e.target.value;setDetail(state.selected,'Profil sélectionné pour comparaison. Les filtres d’axes restent actifs.');drawParallel()});
+ ctl.querySelector('#profilePicker')?.addEventListener('change',e=>{state.selected=e.target.value;saveJourney({examined:state.selected});setDetail(state.selected,'Profil sélectionné pour comparaison. Les filtres d’axes restent actifs.');drawParallel()});
  ctl.querySelector('#colorMetric')?.addEventListener('change',e=>{state.colorMetric=e.target.value;drawParallel()});
  ctl.querySelector('#clearBrush')?.addEventListener('click',()=>{state.brush={};drawParallel()});
 }
@@ -92,6 +149,7 @@ function drawMap(){
    const code=feature.properties.iso2;
    event.stopPropagation();
    if(event.shiftKey){
+     saveJourney({destination:code,focusOrigin:state.passport});
      setDetail(code,`Destination examinée depuis le passeport ${label(state.passport)}. Pour étudier son propre passeport, cliquez normalement sur le pays.`);
      setText('#selectionCount',`Destination inspectée : ${label(code)} · passeport inchangé`);
      polygons.classed('is-selected',d=>d.properties.iso2===code);
@@ -179,6 +237,7 @@ function drawMatrix(){
   .on('mousemove',moveTip).on('mouseleave',hideTip)
   .on('click',(e,d)=>{
     state.selectedPair=`${d.from}|${d.to}`;
+    saveJourney({focusOrigin:d.from,destination:d.to});
     cells.selectAll('button').attr('aria-pressed',v=>String(state.selectedPair===`${v.from}|${v.to}`));
     setDetail(d.to,`Matrice : ${label(d.from)} → ${label(d.to)}.`,d.from);
     setText('#selectionCount',`${label(d.from)} → ${label(d.to)} sélectionné`);
@@ -212,15 +271,15 @@ function drawScatter(){
  const clipID='scatterPlotClip';svg.append('defs').append('clipPath').attr('id',clipID).append('rect').attr('x',m.left).attr('y',m.top).attr('width',innerW).attr('height',height-m.bottom-m.top);
  const dots=svg.append('g').attr('clip-path',`url(#${clipID})`).selectAll('circle').data(rows).join('circle')
   .attr('cx',d=>x(d[xKey])).attr('cy',d=>y(d[yKey])).attr('r',d=>r(d.routes))
-  .attr('fill',d=>d.code===state.passport?'#da9756':'#117c73')
-  .attr('fill-opacity',d=>d.code===state.passport?.95:.47)
+  .attr('fill',d=>d.code===state.passport?'#da9756':d.code===state.compare?'#785db8':'#117c73')
+  .attr('fill-opacity',d=>(d.code===state.passport||d.code===state.compare)?.97:.47)
   .attr('tabindex',0).attr('role','button').attr('aria-label',d=>`Examiner ${d.name}`)
   .style('cursor','pointer')
   .on('mousemove',(e,d)=>{showTip(e,d.name,`${xName} : ${d[xKey]} · ${yName} : ${d[yKey]}`);moveTip(e)})
   .on('mouseout',hideTip)
   .on('click',(e,d)=>select(d))
   .on('keydown',(e,d)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(d)}});
- const select=d=>{setDetail(d.code,`${xName} : ${d[xKey]} · ${yName} : ${d[yKey]}`);updateSelected()};
+ const select=d=>{saveJourney({examined:d.code});setDetail(d.code,`${xName} : ${d[xKey]} · ${yName} : ${d[yKey]}`);updateSelected()};
  const updateSelected=()=>dots.attr('stroke',d=>d.code===state.selected?'#092d32':'white').attr('stroke-width',d=>d.code===state.selected?3:1.25);
  updateSelected();
  const xmean=d3.mean(rows,d=>d[xKey]),ymean=d3.mean(rows,d=>d[yKey]);
@@ -232,7 +291,7 @@ function drawScatter(){
  setText('#chartSubtitle','Un point = un pays ; sa taille représente les routes distinctes. Les points orange indiquent le passeport de référence.');
  setText('#chartMicro',correlation===null?'Corrélation indéterminée':`Corrélation descriptive de Pearson : r = ${correlation.toFixed(2).replace('.',',')}`);
  setText('#selectionCount',`${rows.length} passeports analysés`);
- $('#legend').innerHTML='<span class="legend-item"><i style="background:#117c73"></i>Autres pays</span><span class="legend-item"><i style="background:#da9756"></i>Passeport de référence</span><span class="legend-item"><i style="background:#c16a39"></i>Régression linéaire</span>';
+ $('#legend').innerHTML='<span class="legend-item"><i style="background:#117c73"></i>Autres pays</span><span class="legend-item"><i style="background:#da9756"></i>Passeport étudié</span><span class="legend-item"><i style="background:#785db8"></i>Passeport comparé</span><span class="legend-item"><i style="background:#c16a39"></i>Régression linéaire</span>';
  setText('#howto','Changez les indicateurs sur les axes et la répartition verticale. L’échelle « racine carrée » sépare visuellement les pays peu connectés sans modifier leurs valeurs réelles ni le coefficient de corrélation. Cliquez sur un point pour inspecter le pays.');
  setText('#pipeline','Comptes par formalité de visa puis agrégation des routes sortantes distinctes. Mapping : position X = visa, Y = connectivité, taille = nombre de routes, couleur = passeport choisi. Le coefficient r est purement descriptif.');
 }
@@ -283,6 +342,7 @@ function drawParallel(){
  function selectProfile(code){
   if(!byCode.has(code))return;
   state.selected=code;
+  saveJourney({examined:code});
   setDetail(code,'Le trait orange et les points indiquent ce pays. Le trait bleu en pointillés représente le passeport de référence ; la comparaison chiffrée se met à jour ci-dessus.');
   const pick=$('#profilePicker');if(pick)pick.value=code;
   refresh();
@@ -356,6 +416,6 @@ function drawParallel(){
  setText('#howto','Choisissez un passeport de référence, puis un autre pays dans « Pays à examiner ». Les cinq nombres, les petits diagrammes à barres et le tracé orange changent ensemble. Sur chaque axe, un point placé plus haut indique une valeur plus grande. Comparez les positions d’un même axe entre pays : les axes n’ont pas la même échelle. Glissez verticalement sur un axe pour filtrer, et double-cliquez pour retirer le filtre.');
  setText('#pipeline','Comptages par catégorie de visa, agrégation des routes sortantes par origine, puis jointure par code pays. Mapping : axe vertical = valeur de l’indicateur (échelle propre à chaque axe) ; trait = profil de pays ; orange = profil examiné ; bleu pointillé = référence ; points et badges = valeurs exactes ; gris = contexte ; atténuation = hors filtre.');
 }
-function renderAll(){renderControls();commonStats();setDetail(state.selected||state.passport);if(page==='carte')drawMap();if(page==='matrice')drawMatrix();if(page==='correlation')drawScatter();if(page==='paralleles')drawParallel()}
-async function bootstrap(){try{if(!window.d3)throw new Error('D3.js ne s’est pas chargé. Vérifie la connexion Internet (bibliothèque externe).');const [d,g]=await Promise.all([fetch('data/borderless-fixed.json').then(r=>{if(!r.ok)throw Error('Données JSON introuvables');return r.json()}),fetch('data/world.geojson').then(r=>{if(!r.ok)throw Error('Carte GeoJSON introuvable');return r.json()})]);data=d;geo=g;try{const saved=sessionStorage.getItem('borderless.passport');if(saved&&data.matrix[saved])state.passport=saved}catch{}build();state.selected=page==='paralleles'?(byCode.has('JP')&&state.passport!=='JP'?'JP':byCode.has('FR')&&state.passport!=='FR'?'FR':state.passport):state.passport;renderAll()}catch(e){console.error('Borderless initialisation',e);$('#plot').innerHTML=`<div class="error"><b>Impossible de charger l'application.</b><p>${escapeHtml(e.message)}</p><p>Ouvre le projet avec un serveur local (make serve), et non avec un double-clic sur le fichier HTML.</p></div>`;$('#controls').innerHTML='';$('#stats').innerHTML=''}}
+function renderAll(){renderControls();commonStats();setDetail(state.selected||state.passport);if(page==='carte')drawMap();if(page==='matrice')drawMatrix();if(page==='correlation')drawScatter();if(page==='paralleles')drawParallel();renderJourney()}
+async function bootstrap(){try{if(!window.d3)throw new Error('D3.js ne s’est pas chargé. Vérifie la connexion Internet (bibliothèque externe).');const [d,g]=await Promise.all([fetch('data/borderless-fixed.json').then(r=>{if(!r.ok)throw Error('Données JSON introuvables');return r.json()}),fetch('data/world.geojson').then(r=>{if(!r.ok)throw Error('Carte GeoJSON introuvable');return r.json()})]);data=d;geo=g;try{const cached=JSON.parse(sessionStorage.getItem('borderless.journey.v1')||'null');if(cached&&typeof cached==='object'){for(const key of Object.keys(journey)){if(typeof cached[key]==='string')journey[key]=cached[key]}}else{const saved=sessionStorage.getItem('borderless.passport');if(saved&&data.matrix[saved])journey.origin=saved}}catch{}build();const query=new URLSearchParams(location.search);for(const [key,param] of [['origin','passport'],['compare','compare'],['destination','destination'],['examined','examined']]){const value=query.get(param);if(value&&/^[A-Z]{2}$/.test(value))journey[key]=value};if(page==='carte'&&!query.has('passport')&&byCode.has(journey.focusOrigin))journey.origin=journey.focusOrigin;if(byCode.has(journey.origin))state.passport=journey.origin;if(byCode.has(journey.compare))state.compare=journey.compare;state.selected=page==='paralleles'?(byCode.has(journey.examined)&&journey.examined!==state.passport?journey.examined:byCode.has(state.compare)&&state.compare!==state.passport?state.compare:state.passport):page==='carte'&&journey.destination&&countries.includes(journey.destination)?journey.destination:state.passport;saveJourney({origin:state.passport,compare:state.compare});renderAll()}catch(e){console.error('Borderless initialisation',e);$('#plot').innerHTML=`<div class="error"><b>Impossible de charger l'application.</b><p>${escapeHtml(e.message)}</p><p>Ouvre le projet avec un serveur local (make serve), et non avec un double-clic sur le fichier HTML.</p></div>`;$('#controls').innerHTML='';$('#stats').innerHTML=''}}
 bootstrap();

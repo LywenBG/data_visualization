@@ -51,8 +51,8 @@ Le dataset fourni par le groupe contient **une seule période de visas (2026)** 
 
 | Page | Technique | Tâche utilisateur réalisable | Mapping visuel | Overview + detail |
 |---|---|---|---|---|
-| 1 Carte | Carte choroplèthe + arcs de réseau | Identifier les destinations par exigence de visa et les pays directement reliés | Géométrie = pays ; teinte = type de visa ; arc = liaison répertoriée, regroupée par pays | Carte mondiale, zoom, filtre, infobulle et clic sur un pays |
-| 2 Matrice | Heatmap origine × destination | Comparer les catégories de visa de plusieurs passeports vers les mêmes destinations | Lignes = passeports ; colonnes = destinations ; teinte = visa ; symbole ↗ = liaison directe | Matrice globale défilante, recherche et détail au clic |
+| 1 Matrice | Heatmap origine × destination | Comparer les catégories de visa de plusieurs passeports vers les mêmes destinations | Lignes = passeports ; colonnes = destinations ; teinte = visa ; symbole ↗ = liaison directe | Matrice globale défilante, recherche et détail au clic |
+| 2 Carte | Carte choroplèthe + arcs de réseau | Identifier les destinations par exigence de visa et les pays directement reliés | Géométrie = pays ; teinte = type de visa ; arc = liaison répertoriée, regroupée par pays | Carte mondiale, zoom, filtre, infobulle et clic sur un pays |
 | 3 Nuage | Scatter plot multivarié + régression | Comparer, parmi les pays, mobilité et connectivité ; repérer des points atypiques | X = destinations accessibles (ou autre compte) ; Y = pays reliés / routes ; taille = nombre de routes ; couleur = pays sélectionné | Vue globale des pays, changement des axes, tooltip et fiche |
 | 4 Profils | Coordonnées parallèles + brossage multi-axes | Filtrer les profils de pays par plusieurs indicateurs et comparer des combinaisons atypiques | Axe = variable quantitative ; position verticale = valeur ; ligne = pays ; couleur = indicateur ; atténuation = non retenu | Vue de tous les profils, filtres à la souris et détails |
 

@@ -11,14 +11,14 @@ cd DataViz
 make serve
 ```
 
-Puis ouvrir http://localhost:8000 ou directement `http://localhost:8000/carte.html`.
+Puis ouvrir http://localhost:8000 ou directement `http://localhost:8000/matrice.html`.
 
 Ne pas ouvrir les pages par double-clic `file://` : les requêtes `fetch()` vers `data/` sont bloquées par le navigateur dans ce mode.
 
 ## Les 4 pages
 
-1. **`carte.html` — géographique + réseau** : clic sur un pays **équivalent au changement du champ « Passeport analysé »** (menu, couleurs, arcs, métriques, fiche synchronisés) ; Maj + clic = inspecter une destination sans changer de passeport.
-2. **`matrice.html` — heatmap** : comparaison multi-passeports / destinations, recherche et détail d'une cellule.
+1. **`matrice.html` — heatmap** : comparaison multi-passeports / destinations, recherche et détail d'une cellule ; choix d'un couple étudié pour la suite du parcours.
+2. **`carte.html` — géographique + réseau** : clic sur un pays **équivalent au changement du champ « Passeport analysé »** (menu, couleurs, arcs, métriques, fiche synchronisés) ; Maj + clic = inspecter une destination sans changer de passeport.
 3. **`correlation.html` — scatter plot** : mobilité vs connectivité, axes modifiables, rayon par volume de routes, coefficient de Pearson.
 4. **`paralleles.html` — coordonnées parallèles** : cinq indicateurs, deux tracés très visibles (orange = pays étudié, bleu pointillé = référence), cinq badges de valeur sur les axes, cinq cartes chiffrées avec deux barres de comparaison, filtres multi-axes et changement libre du profil. Après avoir choisi un pays, on peut en sélectionner un autre librement par le menu « Pays à examiner », sur les lignes ou dans les suggestions ; les filtres restent actifs.
 
@@ -28,11 +28,11 @@ Chaque page suit les principes **overview + detail**, présente le **but concret
 
 ```text
 DataViz/
-├── carte.html                 # membre 1
-├── matrice.html               # membre 2
+├── matrice.html               # étape 1, membre 2
+├── carte.html                 # étape 2, membre 1
 ├── correlation.html           # membre 3
 ├── paralleles.html           # membre 4
-├── index.html                 # redirection vers la carte
+├── index.html                 # redirection vers la matrice
 ├── src/
 │   ├── app.js                # état, chargement, agrégations et vues D3
 │   └── styles.css            # design responsive commun
@@ -105,7 +105,7 @@ Tests automatiques : `make check`, `make check-visual`. Le navigateur réel peut
 
 ## Page pédagogique « Pipeline des données »
 
-Une page supplémentaire, [`pipeline.html`](pipeline.html), décrit les sources, les neuf étapes de transformation, les indicateurs dérivés, les mappings visuels des quatre techniques et les limites d’interprétation. Elle est accessible depuis la navigation des quatre visualisations. Le fichier `docs/PIPELINE.md` est conservé sans modification. Le JavaScript, les données et les styles des visualisations originales restent identiques.
+Une page supplémentaire, [`pipeline.html`](pipeline.html), décrit les sources, les neuf étapes de transformation, les indicateurs dérivés, les mappings visuels des quatre techniques et les limites d’interprétation. Elle est accessible depuis la navigation des quatre visualisations. Les sources et les calculs du pipeline sont conservés. La navigation, le suivi du contexte et les styles associés au scénario ont été ajoutés.
 
 
 ## CSV d’origine et pipeline reproductible (DataViz)
@@ -129,4 +129,16 @@ Les deux supports complémentaires sont :
 - La page HTML [`pipeline.html`](pipeline.html), consultable via la navigation du site, avec les deux jointures d’aéroports montrées étape par étape.
 - Le rapport Markdown [`docs/PIPELINE.md`](docs/PIPELINE.md), notamment la section **7** avec les CSV, transformations, exemples réels, calculs, jointures, contrôles de qualité et formulation pour l’oral.
 
-**Démarrage inchangé :** `make serve` depuis `DataViz`, puis `http://localhost:8000`. Les quatre visualisations, leurs interactions, le JavaScript et les CSS n’ont pas été modifiés.
+**Démarrage :** `make serve` depuis `DataViz`, puis `http://localhost:8000`. Le pipeline et les fichiers de données restent inchangés. La navigation et le code d'état de `src/app.js` ont été complétés pour suivre le scénario en quatre étapes.
+
+## Parcours d'analyse en 4 étapes
+
+L'application suit une question : **les droits associés à un passeport correspondent-ils à la connectivité aérienne du pays ?**
+
+1. **Matrice des visas :** comparer les formalités de deux passeports et choisir une destination à examiner.
+2. **Carte et routes :** vérifier la présence de liaisons enregistrées et situer les destinations.
+3. **Corrélation :** tester la relation descriptive sur l'ensemble des pays.
+4. **Profils multivariés :** approfondir les écarts entre pays sur cinq indicateurs.
+
+Le passeport, la comparaison, la destination inspectée et le profil examiné sont conservés entre les pages. L'analyse démarre sur `matrice.html`. Le scénario et les limites sont détaillés dans [`docs/SCENARIO.md`](docs/SCENARIO.md).
+
