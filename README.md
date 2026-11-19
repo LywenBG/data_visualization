@@ -28,10 +28,10 @@ Chaque page suit les principes **overview + detail**, présente le **but concret
 
 ```text
 DataViz/
-├── matrice.html               # étape 1, membre 2
-├── carte.html                 # étape 2, membre 1
-├── correlation.html           # membre 3
-├── paralleles.html           # membre 4
+├── matrice.html               # étape 1, Diallo Mamadou
+├── carte.html                 # étape 2, Martin Baras
+├── correlation.html           # étape 3, OUAHRANI KHALDI Sofiane
+├── paralleles.html           # étape 4, Iuliia FILIPPOVA
 ├── index.html                 # redirection vers la matrice
 ├── src/
 │   ├── app.js                # état, chargement, agrégations et vues D3
@@ -60,14 +60,14 @@ make check
 
 La commande `make check` vérifie la syntaxe JS, les agrégations, les sélecteurs et les invariants des données et pages. Avec `pip install playwright` puis une installation locale de Chromium, `make check-visual` exécute en plus 16 contrôles de mise en page sur 4 largeurs. **Les gestes D3 complets (zoom, brushing, clic) doivent encore être validés dans un navigateur avec le serveur local.**
 
-## Répartition suggérée
+## Répartition du travail
 
-- Membre 1 : carte / réseau, projection, zoom et détails géographiques.
-- Membre 2 : matrice et interactions de comparaison / recherche.
-- Membre 3 : scatter plot, régression, modalités de comparaison.
-- Membre 4 : coordonnées parallèles, brushing et profils filtrés.
-
-Tous documentent ensemble le nettoyage, les limites et le public cible. Une mise en commun du code partagé dans `app.js` est nécessaire avant de fusionner les branches Git.
+| Membre | Contribution |
+|---|---|
+| DIALLO Mamadou | Matrice des visas (heatmap) : comparaison des passeports, recherche et filtres. |
+| BARAS Martin | Carte et routes aériennes : projection géographique, zoom et interactions. |
+| OUAHRANI KHALDI Sofiane | Nuage de points : corrélation et régression ; pipeline de traitement des données : nettoyage, normalisation, jointures et agrégations. |
+| FILIPPOVA Iuliia | Profils multivariés (coordonnées parallèles) : comparaison des profils et filtres sur les axes. |
 
 ## Utilisation des profils multivariés
 
@@ -79,23 +79,11 @@ Tous documentent ensemble le nettoyage, les limites et le public cible. Une mise
 
 Les quatre encadrés « But de la technique » décrivent les fonctionnalités réellement possibles avec les données disponibles ; ils ne prétendent pas montrer une évolution annuelle.
 
-## Correctifs ergonomiques et bugs (audit de novembre 2026)
-
-- **Carte sans encadré :** contour, fond de carte-cadre et ombre supprimés de la zone de visualisation ; le panneau de détails reste indépendant.
-- **Téléphone :** barre de navigation horizontale scrollable sans étirer tout le document ; bloc « But de la technique » visible aussi sur mobile.
-- **Diagrammes denses :** défilement horizontal **interne** à la heatmap, au nuage et aux coordonnées parallèles pour conserver des axes lisibles.
-- **Carte :** zoom et visibilité des arcs conservés lors des changements de filtres ; bouton « Recentrer » et territoire sélectionné mis en évidence ; arcs cohérents avec la catégorie filtrée ; légende du pays d'origine ajoutée.
-- **Matrice :** le filtre de visa agit sur les destinations des deux passeports étudiés ; recherche tolérante aux accents ; message explicite si aucune destination ; un clic sur une cellule ne change plus le passeport principal ; entêtes améliorés.
-- **Corrélation :** taille minimale des points, sélection au clavier et au clic, droite de régression rognée à la zone du graphique ; choix de l’échelle Y pour mieux répartir les points.
-- **Coordonnées parallèles :** sélection modifiable à tout moment, ligne étudiée mise au premier plan, filtres conservés.
-- **Données :** certains territoires ne disposent pas d'un profil passeport, mais leurs catégories de visa et routes restent consultables dans la fiche au lieu de disparaître.
-- **Navigation :** le passeport choisi est conservé pendant la session lors du passage entre les quatre pages (stockage de session local du navigateur).
-
 ### Vérifications
 
 `make check` vérifie les calculs de base et la présence des composants. `make check-visual` (facultatif) reproduit 16 conditions d'affichage avec Chromium et vérifie l'absence de débordement de page, la visibilité du but de chaque technique et l'absence de cadre de la carte. Le test de mise en page utilise un graphique simulé : il ne prétend pas exécuter tous les gestes interactifs D3. La bibliothèque D3 nécessite encore une connexion Internet au chargement initial depuis son CDN.
 
-## Ajustements d'ergonomie — sélection sur la carte et comparaison des profils (novembre 2026)
+## Ajustements d'ergonomie — sélection sur la carte et comparaison des profils 
 
 - **Carte :** la sélection par clic et par menu appelle une fonction commune `choosePassport()`. Les deux gestes actualisent `#passport`, les statistiques, les catégories de visa, les routes et la fiche. Les filtres et le zoom sont conservés. **Maj + clic** inspecte uniquement une destination. Lorsqu'un territoire n'a pas de fiche passeport, le site l'explique au lieu de l'ajouter artificiellement au menu.
 - **Profils :** visualisation conçue pour comparer *un pays examiné* (orange) à *un passeport de référence* (bleu pointillé). Les 5 points orange avec leurs valeurs se déplacent quand on change de pays. Un comparateur supérieur donne pour chaque indicateur les deux valeurs exactes, leur écart et deux barres. Les profils des autres pays restent en arrière-plan pour la distribution. Les sélections de plage (brushing) ne détruisent pas le graphique.
