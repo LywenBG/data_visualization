@@ -1,6 +1,6 @@
 # Borderless — 4 pages D3.js, 4 techniques distinctes
 
-Projet universitaire d'Information Visualization, conçu pour une équipe de 4. Il explore les exigences de visa (2026) et les liaisons aériennes internationales répertoriées à partir des archives CSV fournies. **Toutes les données sont intégrées au projet**, aucun téléversement utilisateur n'est nécessaire.
+Projet universitaire de Data Visualization, conçu par une équipe de 4. Il explore les exigences de visa (2026) et les liaisons aériennes internationales répertoriées à partir des archives CSV récupérées depuis Kaggle. **Toutes les données sont intégrées au projet**, aucun téléversement utilisateur n'est nécessaire.
 
 ## Démarrage
 
